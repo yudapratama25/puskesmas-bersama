@@ -26,13 +26,21 @@
         $pdo->commit();
 	
         if ($medicineData > 0) {
-          for ($i=0; $i < $medicineData; $i++) { 
+
+          foreach ($_POST["input-qty"] as $qty) {
+              if ($qty < 0) {
+                echo "<script>alert('Kuantiti obat tidak boleh mines !'); window.location.href = window.location.href; </script>";
+                exit();
+              }
+          }
+
+          for ($i=0; $i < $medicineData; $i++) {
             if (trim($_POST['input-medicine'] != '') && trim($_POST['input-dose'] != '') && trim($_POST['input-qty'] != '')) {
               $pdo->beginTransaction();
               // Initialize Data
-              $medicine = $_POST["input-medicine"][$i];
-              $dose  = $_POST["input-dose"][$i];
-              $qty  = $_POST["input-qty"][$i];
+              $medicine   = $_POST["input-medicine"][$i];
+              $dose       = $_POST["input-dose"][$i];
+              $qty        = $_POST["input-qty"][$i];
               $priceQuery = $pdo->prepare("SELECT price FROM obat WHERE id = ?");
               $priceQuery->execute([$medicine]);
               $priceData = $priceQuery->fetchAll(PDO::FETCH_ASSOC);
@@ -115,7 +123,7 @@
                                     <?php } ?>
                             </select></td>
                       <td><input type="text" name="input-dose[]" placeholder="Masukan Dosis" class="form-control"/></td>
-                      <td><input type="number" name="input-qty[]" placeholder="Qty" class="form-control"/></td>
+                      <td><input type="number" min="1" value="1" name="input-qty[]" placeholder="Qty" class="form-control"/></td>
                       <td><button type="button" name="add" id="add" class="btn btn-primary">Tambahkan</button></td>  
                     </tr>
                     </table>
@@ -143,7 +151,7 @@
 
       $("#add").click(function(){
         i++;
-        $('#dynamic_field').append('<tr id="row'+i+'"><td><select required name="input-medicine[]" class="form-control" aria-label="Pilih Obat"><?php foreach ($medicines as $medicine) { ?><option value="<?= $medicine['id'] ?>"><?= $medicine['name'] ?></option><?php } ?></select></td><td><input type="text" name="input-dose[]" placeholder="Masukan Dosis" class="form-control"/></td><td><input type="number" name="input-qty[]" placeholder="Qty" class="form-control"/></td> <td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></td></tr>');  
+        $('#dynamic_field').append('<tr id="row'+i+'"><td><select required name="input-medicine[]" class="form-control" aria-label="Pilih Obat"><?php foreach ($medicines as $medicine) { ?><option value="<?= $medicine['id'] ?>"><?= $medicine['name'] ?></option><?php } ?></select></td><td><input type="text" name="input-dose[]" placeholder="Masukan Dosis" class="form-control"/></td><td><input type="number" min="1" value="1" name="input-qty[]" placeholder="Qty" class="form-control"/></td> <td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></td></tr>');  
       });
 
       $(document).on('click', '.btn_remove', function(){  
