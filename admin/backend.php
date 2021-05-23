@@ -59,7 +59,7 @@
     session_unset();
     session_destroy();
     // header("Location: ./pages/login/login.php");
-    echo "<script>window.location.href = './pages/login/login.php'; </script>";
+    echo "<script>window.location.href = window.location.origin + '/admin/pages/signin.php'; </script>";
   } elseif(isset($_POST['updateProfile'])) {
     $pdo->beginTransaction();
     try {
