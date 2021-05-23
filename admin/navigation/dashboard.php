@@ -14,7 +14,7 @@ require_once 'header_navigation.php';
       $query->execute();
       $datas = $query->fetchAll(PDO::FETCH_ASSOC);
     } elseif($userData['user_type'] == 0) {
-      $query = $pdo->prepare("SELECT * FROM riwayat_kunjungan INNER JOIN riwayat_obat ON riwayat_kunjungan.id_visithistory = riwayat_obat.id_visithistory WHERE riwayat_kunjungan.username = ? GROUP BY visit_date ORDER BY visit_date ASC");
+      $query = $pdo->prepare("SELECT *, transactions.id AS transaction_id FROM riwayat_kunjungan INNER JOIN riwayat_obat ON riwayat_kunjungan.id_visithistory = riwayat_obat.id_visithistory INNER JOIN transactions ON riwayat_kunjungan.id_visithistory = transactions.id_visithistory WHERE riwayat_kunjungan.username = ? GROUP BY visit_date ORDER BY visit_date ASC");
       $query->execute([$userData['username']]);
       $datas = $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -75,17 +75,17 @@ require_once 'header_navigation.php';
             </div>
             <div class="table-responsive">
               <!-- Projects table -->
-              <table class="table align-items-center table-flush">
+              <table class="table align-items-center table-flush table-striped table-hover">
                 <thead class="thead-light">
                   <tr>
                     <?php if ($userData['user_type'] == 0) { ?>
                       <th scope="col">No</th>
                       <th scope="col">Penyakit Diderita</th>
                       <th scope="col">Obat Digunakan</th>
-                      <th scope="col">Tanggal Kunjungan</th>
                       <th scope="col">Catatan</th>
-                    <?php
-                     } else { ?>
+                      <th scope="col">Tanggal Kunjungan</th>
+                      <th scope="col">Transaksi</th>
+                    <?php } else { ?>
                       <th scope="col">No Urut</th>
                       <th scope="col">Nomor Pendaftaran</th>
                       <th scope="col">Nama Pasien</th>
@@ -100,7 +100,7 @@ require_once 'header_navigation.php';
                 <?php 
                   if ($userData['user_type'] == 0) {
                     if(!empty($datas)) { foreach ($datas as $data) {
-                      $queryMedicine = $pdo->prepare("SELECT name FROM obat WHERE id IN (SELECT id_medicine FROM riwayat_obat as rk WHERE rk.id_visithistory = ?)");
+                      $queryMedicine = $pdo->prepare("SELECT *, obat.id AS id_medicine FROM riwayat_obat INNER JOIN obat ON riwayat_obat.id_medicine = obat.id WHERE riwayat_obat.id_visithistory = ?");
                       $queryMedicine->execute([$data['id_visithistory']]);
                       $medicines = $queryMedicine->fetchAll(PDO::FETCH_ASSOC);
                       $medicine = [];
@@ -113,22 +113,27 @@ require_once 'header_navigation.php';
                           <?= $data['disease'] ?>
                         </th>
                         <td>
-                          <?php
-                            foreach($medicines as $drug) { 
-                              $medicine[] = $drug['name'];
-                            }
-                            echo join(", ", $medicine);
-                          ?>
+                          <?php foreach($medicines as $drug) { ?>
+                            <?php echo $drug['name'] . ' | ' . $drug['dose'] ?> <hr class="my-1"/>
+                          <?php } ?>
+                        </td>
+                        <td>
+                          <?= $data['note'] ?>
                         </td>
                         <td>
                           <?= $data['visit_date'] ?>
                         </td>
                         <td>
-                          <?= $data['note'] ?>
-                        </td>  
+                          Biaya Berobat : Rp <?= number_format($data['total'], 0, '.', ',') ?>
+                          <hr class="my-1" />
+                          Total Bayar : Rp <?= number_format($data['bayar'], 0, '.', ',') ?>
+                          <?php if ($data['kembali'] > 0): ?>
+                          <hr class="my-1" />
+                          Kembali : Rp <?= number_format($data['kembali'], 0, '.', ',') ?>
+                          <?php endif ?>
+                        </td>
                       </tr>
-                    <?php }  }
-                    else { ?>
+                    <?php } } else { ?>
                       <tr>
                         <td></td>
                         <td><h4>Anda belum memiliki riwayat kunjungan, silahkan mendaftarkan diri anda</h4></td>

@@ -1,4 +1,6 @@
-<?php 
+<?php
+  date_default_timezone_set("Asia/Kuala_Lumpur");
+
   require_once '../function.php';
   require_once 'backend.php';  
   require_once '../connection.php';

@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set("Asia/Kuala_Lumpur");
+
   if (!isset($_SESSION['userId'])) {
     // header("Location: ./pages/signin.php");
     echo "<script>window.location.href = './pages/signin.php'; </script>";

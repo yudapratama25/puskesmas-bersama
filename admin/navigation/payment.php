@@ -8,9 +8,8 @@
     exit();
   } else { 
     if ($userData['user_type'] == 2) {
-
         // List transaction
-        $query = $pdo->prepare("SELECT *, riwayat_kunjungan.id AS id_riwayat_kunjungan, user.id AS user_id FROM riwayat_kunjungan INNER JOIN user ON riwayat_kunjungan.username = user.username GROUP BY riwayat_kunjungan.id_visithistory ORDER BY riwayat_kunjungan.visit_date DESC");
+        $query = $pdo->prepare("SELECT *, riwayat_kunjungan.id AS id_riwayat_kunjungan, user.id AS user_id FROM riwayat_kunjungan INNER JOIN user ON riwayat_kunjungan.username = user.username WHERE riwayat_kunjungan.id_visithistory NOT IN (SELECT id_visithistory FROM transactions) GROUP BY riwayat_kunjungan.id_visithistory ORDER BY riwayat_kunjungan.visit_date DESC");
         $query->execute();
         $patients = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -18,15 +17,27 @@
         $pay = false;
         if (isset($_POST['input-payment-id'])) {
             $totalPrice = 0;
-            $money = "";
-            $query = $pdo->prepare("SELECT * FROM riwayat_obat WHERE id_visithistory = ?");
-            $idPayment = $_POST['input-payment-id'];
+            $money      = "";
+            $query      = $pdo->prepare("SELECT * FROM riwayat_obat WHERE id_visithistory = ?");
+            $idPayment  = $_POST['input-payment-id'];
             $query->execute([$idPayment]);
             $datas = $query->fetchAll(PDO::FETCH_ASSOC);
             $firstLoad = false;
             if (isset($_POST['input-money'])) {
-                $money = $_POST['input-money'];
-                $pay = true;
+                $money           = $_POST['input-money'];
+                $total_transaksi = $_POST['total_transaksi'];
+                if ($money >= $total_transaksi) {
+                    $pay           = true;
+                    // insert to transactions table
+                    $koneksi      = mysqli_connect('localhost', 'root', 'root', 'my_puskesmas');
+                    $return_money = $money - $total_transaksi;
+                    $date         = date('Y-m-d H:i:s');
+                    $query        = "INSERT INTO transactions VALUES (NULL, '$idPayment', '$total_transaksi', '$money', '$return_money', '$date')";
+                    mysqli_query($koneksi, $query) or die(mysqli_error($koneksi));
+                    echo "<script>alert('Pembayaran Berhasil !'); setTimeout(function(){ window.location.href = window.location.href; }, 6500);</script>";
+                } else {
+                    echo "<script>alert('Pembayaran Gagal ! Uang tidak mencukupi !');</script>";
+                }
             }
         } else {
             $firstLoad = true;
@@ -109,7 +120,8 @@
                                         <th scope="col">No</th>
                                         <th scope="col">Nama Obat</th>
                                         <th scope="col">Qty</th>
-                                        <th scope="col">Harga</th>
+                                        <th scope="col">Harga Satuan (Rp)</th>
+                                        <th scope="col">Total Harga (Rp)</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -129,35 +141,54 @@
                                                 </th>
                                                 <td>
                                                     <?php
-                                                        $totalPrice += $data['price'];
-                                                        echo $data['price']; ?>
-                                                </td>  
+                                                        echo number_format($data['price'], 0, '.', ',');
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                        $total_harga_obat = $data['price'] * $data['qty'];
+                                                        $totalPrice += $total_harga_obat;
+                                                        echo number_format($total_harga_obat, 0, '.', ',');
+                                                    ?>
+                                                </td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
                                 </table>
-                                <h6 class="heading-small text-muted mb-4">Total</h6>
+                                <h6 class="heading-small text-muted mb-2">Total</h6>
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Rp.0" value="Rp. <?= $totalPrice ?>" readonly>
+                                    <h2 class="mt-0">Rp <?= number_format($totalPrice, 0, '.', ','); ?></h2>
+                                    <input type="hidden" class="form-control" placeholder="Rp.0" value="Rp <?= number_format($totalPrice, 0, '.', ','); ?>" readonly>
                                 </div>
-                                <h6 class="heading-small text-muted mb-4">Uang</h6>
+                                <input type="hidden" name="total_transaksi" value="<?php echo $totalPrice ?>" required>
+                                <?php if ($pay == false): ?>
+                                <h6 class="heading-small text-muted mb-4">Uang Bayar</h6>
                                 <div class="form-group">
-                                    <input type="text" id="input-money" name="input-money" class="form-control" value="<?=$money ?>" placeholder="Masukan Jumlah Uang" required>
+                                    <input type="text" id="input-money" name="input-money" class="form-control" value="<?= $money ?>" placeholder="Masukan Jumlah Uang Pembayaran ..." required>
                                 </div>
-                                <div class="form-group form-button">
-                                    <input type="submit" name="input-pay" value="Bayar" id="input-pay" value="Bayar" class="btn btn-primary"/>        
+                                <?php else: ?>
+                                <h6 class="heading-small text-muted mb-2">Uang Bayar</h6>
+                                <div class="form-group">
+                                    <h2 class="mt-0">Rp <?= number_format($money, 0, '.', ','); ?></h2>
                                 </div>
+                                <?php endif ?>
+                                <?php if ($pay == false): ?>
+                                    <div class="form-group form-button">
+                                        <input type="submit" name="input-pay" value="Bayar" id="input-pay" value="Bayar" class="btn btn-primary"/>        
+                                    </div>
+                                <?php endif ?>
                                 <?php if ($pay) { if ($money >= $totalPrice) { ?>
-                                    <h6 class="heading-small text-muted mb-4">Kembalian</h6>
+                                    <h6 class="heading-small text-muted mb-2">Kembalian</h6>
                                     <div class="form-group">
-                                        <input type="text" id="change" name="change" class="form-control" value="Rp. <?=  $money - $totalPrice ?>" placeholder="Kembalian" readonly>
+                                        <h2 class="mt-0">Rp <?= number_format(($money - $totalPrice), 0, '.', ','); ?></h2>
+                                        <input type="hidden" id="change" name="change" class="form-control" value="Rp. <?=  number_format(($money - $totalPrice), 0, '.', ',') ?>" placeholder="Kembalian" readonly>
                                     </div>
                                 <?php } else { ?>
                                     <div class="card-header bg-transparent">
                                         <div class="alert alert-danger">Nominal Uang Kurang!</div>
                                     </div>
-                                <?php }}?>
-                <?php   } elseif(!$firstLoad) { ?>
+                                <?php } } ?>
+                    <?php } elseif(!$firstLoad) { ?>
                         <div class="card-header bg-transparent">
                             <div class="alert alert-danger">Nomor pendaftaran salah</div>
                         </div>

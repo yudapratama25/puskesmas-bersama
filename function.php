@@ -1,4 +1,7 @@
 <?php
+
+date_default_timezone_set("Asia/Kuala_Lumpur");
+
     function includeWithVariables($filePath, $variables = [], $print = true) {
         $output = null;
 

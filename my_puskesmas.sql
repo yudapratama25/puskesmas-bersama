@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 22 Bulan Mei 2021 pada 14.41
+-- Waktu pembuatan: 23 Bulan Mei 2021 pada 12.29
 -- Versi server: 10.2.6-MariaDB-log
 -- Versi PHP: 7.4.1
 
@@ -93,7 +93,8 @@ INSERT INTO `riwayat_kunjungan` (`id`, `id_visithistory`, `username`, `visit_dat
 (1, 1, 'tisya', '2021-05-22 20:35:24', 'Sakit biasa aja ini mah', 'Kurangi begadang'),
 (2, 1, 'tisya', '2021-05-22 20:35:24', 'Sakit biasa aja ini mah', 'Kurangi begadang'),
 (4, 3, 'tisya', '2021-05-22 20:50:50', 'Batuk', 'Minum Obat'),
-(5, 5, 'tisya', '2021-05-22 20:56:27', 'Diare', 'Minum Obat Yo');
+(5, 5, 'tisya', '2021-05-22 20:56:27', 'Diare', 'Minum Obat Yo'),
+(6, 7, 'jero', '2021-05-23 12:29:06', 'Sakit Perut Biasa Aja Itu', 'Minum obat nya ye');
 
 -- --------------------------------------------------------
 
@@ -119,7 +120,34 @@ INSERT INTO `riwayat_obat` (`id`, `id_medicine`, `id_visithistory`, `dose`, `qty
 (3, 3, 3, '7 x sehari', 90, 9000),
 (4, 7, 3, '10 x sehari', 10, 3000),
 (5, 6, 5, '10 x sehari', 5, 10000),
-(6, 2, 5, '12 botol sehari', 7, 10000);
+(6, 2, 5, '12 botol sehari', 7, 10000),
+(7, 7, 7, '4 kali sehari', 3, 3000),
+(8, 2, 7, '50 kali sehari', 5, 10000);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `transactions`
+--
+
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL,
+  `id_visithistory` int(11) NOT NULL,
+  `total` int(11) NOT NULL,
+  `bayar` int(11) NOT NULL,
+  `kembali` int(11) NOT NULL,
+  `tanggal` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `transactions`
+--
+
+INSERT INTO `transactions` (`id`, `id_visithistory`, `total`, `bayar`, `kembali`, `tanggal`) VALUES
+(5, 5, 120000, 120000, 0, '2021-05-23 20:02:28'),
+(6, 1, 24000, 25000, 1000, '2021-05-23 20:03:56'),
+(7, 7, 59000, 60000, 1000, '2021-05-23 20:06:06'),
+(8, 3, 840000, 1000000, 160000, '2021-05-23 20:06:44');
 
 -- --------------------------------------------------------
 
@@ -149,7 +177,9 @@ CREATE TABLE `user` (
 INSERT INTO `user` (`id`, `username`, `email`, `password`, `full_name`, `user_type`, `birth_date`, `address`, `city`, `country`, `postal_code`, `bio`) VALUES
 (5, 'admin', 'admin@gmail.com', '$2y$10$BvtCxWqky8KbW0He9OjM/eOdIgdqZEi07UwNT9fkHtcTLzc7Iavkq', 'Admin Puskesmas', 2, '1997-05-06', 'Jl. Jalan jalan', 'Samarinda', 'Indonesia', 75571, 'Just Do It!'),
 (13, 'tisya', 'tisya@gmail.com', '$2y$10$TtCjXGhsMR0SFBNnL2/R9uzFnOeYZO1ki8Ui6/Lgxg.FJLw.DXYra', 'Metisya Darwi', 0, '2001-02-21', 'Loa Janan', 'Balikpapan', 'Indonesia', 14022, 'Cwk'),
-(14, 'dokter', 'dokter@gmail.com', '$2y$10$rPrmc9pf6G8OCLmeX.K/oecfKpkZqHcVdxZxlEO4aZCTFbf4rLJUm', 'Dr.Tirta', 1, '2020-12-11', 'Jl. Jakarta', 'Jakarta', 'Arab', 71241, 'dawdadawd');
+(14, 'dokter', 'dokter@gmail.com', '$2y$10$rPrmc9pf6G8OCLmeX.K/oecfKpkZqHcVdxZxlEO4aZCTFbf4rLJUm', 'Dr.Tirta', 1, '2020-12-11', 'Jl. Jakarta', 'Jakarta', 'Arab', 71241, 'dawdadawd'),
+(15, 'elsa', 'elsa@gmail.com', '$2y$10$eTdF7uHCWoIjxKjITRQdfeR1UkhrsSoenQaGeSTkkcCUrosXzLHSS', 'Elsa Mardhiyah', 0, '2001-01-17', 'Jl. Jalan', 'Balikpapan', 'Irak', 12345, 'Cwk'),
+(16, 'jero', 'jero@gmail.com', '$2y$10$fMm.ZzTOaIYx0cr.tfMAXu3egs4sZvMiQE.POIlqWfDKc8PSg0Z7.', 'Jeroline Betsy Angela', 0, '2019-06-20', 'Jl. Mantab', 'Gaza', 'Iran', 54321, 'Jero ubah');
 
 --
 -- Indexes for dumped tables
@@ -180,6 +210,12 @@ ALTER TABLE `riwayat_obat`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indeks untuk tabel `transactions`
+--
+ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeks untuk tabel `user`
 --
 ALTER TABLE `user`
@@ -193,7 +229,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT untuk tabel `antrian_pasien`
 --
 ALTER TABLE `antrian_pasien`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `obat`
@@ -205,19 +241,25 @@ ALTER TABLE `obat`
 -- AUTO_INCREMENT untuk tabel `riwayat_kunjungan`
 --
 ALTER TABLE `riwayat_kunjungan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `riwayat_obat`
 --
 ALTER TABLE `riwayat_obat`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT untuk tabel `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
