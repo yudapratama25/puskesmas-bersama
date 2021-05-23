@@ -212,7 +212,6 @@ require_once 'header_navigation.php';
                               <i class="fa fa-ellipsis-v"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                              <a href="../pages/patient_action.php?id=<?= $data['id'] ?>" class="dropdown-item">Tindakan</a>
                               <a href="dashboard.php?page=patient-delete&id=<?= $data['id'] ?>" class="dropdown-item">Hapus</a>
                             </div>
                           </div>

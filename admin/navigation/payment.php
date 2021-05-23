@@ -8,6 +8,12 @@
     exit();
   } else { 
     if ($userData['user_type'] == 2) {
+
+        // List transaction
+        $query = $pdo->prepare("SELECT *, riwayat_kunjungan.id AS id_riwayat_kunjungan, user.id AS user_id FROM riwayat_kunjungan INNER JOIN user ON riwayat_kunjungan.username = user.username GROUP BY riwayat_kunjungan.id_visithistory ORDER BY riwayat_kunjungan.visit_date DESC");
+        $query->execute();
+        $patients = $query->fetchAll(PDO::FETCH_ASSOC);
+
         $idPayment = "";
         $pay = false;
         if (isset($_POST['input-payment-id'])) {
@@ -26,7 +32,9 @@
             $firstLoad = true;
         }
     } else {
-        exit(header("Location: dashboard.php"));
+        // exit(header("Location: dashboard.php"));
+        echo "<script>window.location.href = 'dashboard.php'; </script>";
+        exit();
     }
   }
 ?>
@@ -82,8 +90,14 @@
                     <!-- Description -->
                     <h6 class="heading-small text-muted mb-4">No Pendaftaran</h6>
                     <div class="form-group">
-                        <input type="text" id="input-payment-id" value="<?= $idPayment ?>" name="input-payment-id" class="form-control" placeholder="Masukan No Pendaftaran Anda" required>
-                        <input type="submit"style="margin-top:4px;" name="check-id" value="Check" class="btn btn-primary">
+                        <select required name="input-payment-id" class="form-select form-control">
+                            <?php foreach ($patients as $patient): ?>
+                                <option value="<?= $patient['id_visithistory'] ?>" <?= ($idPayment != "" && $idPayment == $patient['id_visithistory']) ? 'selected' : null ?>>
+                                    #<?= $patient['id_visithistory'] ?> - <?= $patient['full_name'] ?> (<?= $patient['disease'] ?>)
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                        <input type="submit" name="check-id" value="Check" class="btn btn-primary mt-3">
                     </div>
                     <?php 
                         if(!empty($datas)) { ?>
