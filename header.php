@@ -52,8 +52,14 @@
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
 
-      <h1 class="logo me-auto"><a href="index.php">Puskesmas Bersama</a></h1>
-      <a href="index.php" class="logo me-auto"><img src="assets/img/logo_puskermas.jpg" alt="Logo Puskesmas" class="img-fluid"></a>
+      <h1 class="logo me-auto">
+        <a href="index.php" class="d-block d-sm-none">
+          Puskesmas Bersama
+        </a>
+        <a href="index.php" class="d-none d-md-block">
+          <img src="assets/img/logo_puskermas.jpg" alt="Logo Puskesmas" class="img-fluid"> Puskesmas Bersama
+        </a>
+      </h1>
 
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
